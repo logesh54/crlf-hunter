@@ -40,6 +40,30 @@ fi
 ln -s "$CLI_SCRIPT" "$LINK_PATH"
 echo "Created symlink: $LINK_PATH -> $CLI_SCRIPT"
 
+# Add /usr/local/bin to PATH in shell config if not already present
+SHELL_CONFIG=""
+if [ -n "$ZSH_VERSION" ]; then
+    SHELL_CONFIG="$HOME/.zshrc"
+elif [ -n "$BASH_VERSION" ]; then
+    SHELL_CONFIG="$HOME/.bashrc"
+else
+    # Try to detect from SHELL
+    case "$SHELL" in
+        */zsh) SHELL_CONFIG="$HOME/.zshrc" ;;
+        */bash) SHELL_CONFIG="$HOME/.bashrc" ;;
+        *) SHELL_CONFIG="$HOME/.profile" ;;
+    esac
+fi
+
+if [ -n "$SHELL_CONFIG" ] && [ -f "$SHELL_CONFIG" ]; then
+    if ! grep -q 'export PATH="/usr/local/bin:$PATH"' "$SHELL_CONFIG"; then
+        echo '' >> "$SHELL_CONFIG"
+        echo '# Add /usr/local/bin to PATH for crlf-hunter' >> "$SHELL_CONFIG"
+        echo 'export PATH="/usr/local/bin:$PATH"' >> "$SHELL_CONFIG"
+        echo "Added /usr/local/bin to PATH in $SHELL_CONFIG"
+    fi
+fi
+
 # Verify installation
 if command -v crlf-hunter >/dev/null 2>&1; then
     echo ""
@@ -47,6 +71,10 @@ if command -v crlf-hunter >/dev/null 2>&1; then
     echo "Run 'crlf-hunter --help' to get started."
 else
     echo ""
-    echo "Warning: crlf-hunter command not found in PATH."
-    echo "You may need to restart your shell or add $INSTALL_DIR to your PATH."
+    echo "Installation complete, but crlf-hunter not found in current PATH."
+    echo "Please restart your shell or run:"
+    echo "  source ~/.bashrc   # for bash"
+    echo "  source ~/.zshrc    # for zsh"
+    echo ""
+    echo "Or run directly: /usr/local/bin/crlf-hunter --help"
 fi
