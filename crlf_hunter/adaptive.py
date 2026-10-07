@@ -5,7 +5,7 @@ Automatically detects rate limiting and WAF presence, adjusts scan behavior
 
 import re
 import time
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, Any
 from dataclasses import dataclass, field
 from enum import Enum
 from collections import deque
